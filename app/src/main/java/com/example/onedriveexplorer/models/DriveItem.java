@@ -27,4 +27,13 @@ public class DriveItem {
         @SerializedName("mimeType")
         public String mimeType;
     }
+    public boolean isDirectory() {
+        return folder != null;
+    }
+
+    public String getFormattedSize() {
+        if (file == null) return "";
+        // Simple placeholder for size formatting
+        return "File"; 
+    }
 }
