@@ -2923,6 +2923,8 @@ int drawable design_ic_visibility_off 0x7f070083
 int drawable design_password_eye 0x7f070084
 int drawable design_snackbar_background 0x7f070085
 int drawable ic_arrow_back_black_24 0x7f070086
+int drawable ic_check_circle_filled 0x7f0700e3
+int drawable ic_circle_outline 0x7f0700e4
 int drawable ic_clear_black_24 0x7f070087
 int drawable ic_clock_black_24dp 0x7f070088
 int drawable ic_file_doc 0x7f0700dd
@@ -3118,6 +3120,7 @@ int id buttonPanel 0x7f080062
 int id cache_measures 0x7f080063
 int id callMeasure 0x7f080064
 int id cancel_button 0x7f080065
+int id cardView 0x7f080200
 int id carryVelocity 0x7f080066
 int id center 0x7f080067
 int id centerCrop 0x7f080068
@@ -3416,6 +3419,7 @@ int id search_view_toolbar_container 0x7f080183
 int id search_voice_btn 0x7f080184
 int id select_dialog_listview 0x7f080185
 int id selected 0x7f080186
+int id selectionCheckbox 0x7f0801ff
 int id selection_type 0x7f080187
 int id sharedValueSet 0x7f080188
 int id sharedValueUnset 0x7f080189

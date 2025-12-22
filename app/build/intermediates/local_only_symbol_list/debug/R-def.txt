@@ -10,6 +10,8 @@ color purple_700
 color teal_200
 color teal_700
 color white
+drawable ic_check_circle_filled
+drawable ic_circle_outline
 drawable ic_file_doc
 drawable ic_file_generic
 drawable ic_file_image
@@ -18,6 +20,7 @@ drawable ic_folder_colored
 drawable ic_launcher_background
 drawable ic_launcher_foreground
 id action_toggle_view
+id cardView
 id fab_add_folder
 id fileDate
 id fileIcon
@@ -31,6 +34,7 @@ id icon_view
 id name_view
 id progress_bar
 id recycler_view
+id selectionCheckbox
 id swipe_refresh_layout
 layout activity_main
 layout file_item
