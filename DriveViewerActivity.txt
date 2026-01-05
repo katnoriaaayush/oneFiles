@@ -1,0 +1,463 @@
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.MediaSource;
+import androidx.media3.exoplayer.source.ProgressiveMediaSource;
+import androidx.media3.ui.PlayerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource as GlideDataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+import com.github.chrisbanes.photoview.PhotoView;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class DriveViewerActivity extends AppCompatActivity {
+
+    private ExoPlayer player;
+    private PlayerView playerView;
+    private PhotoView photoView;
+    private ProgressBar progressBar; // <-- Added
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // 1. Setup Layout (Video + Image + Progress Stacked)
+        FrameLayout rootLayout = new FrameLayout(this);
+        rootLayout.setBackgroundColor(Color.BLACK);
+        rootLayout.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // Video View
+        playerView = new PlayerView(this);
+        playerView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+        playerView.setVisibility(View.GONE);
+
+        // Image View (PhotoView)
+        photoView = new PhotoView(this);
+        photoView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+        photoView.setVisibility(View.GONE);
+
+        // Loading Indicator (ProgressBar)
+        progressBar = new ProgressBar(this);
+        FrameLayout.LayoutParams progressParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        progressParams.gravity = Gravity.CENTER;
+        progressBar.setLayoutParams(progressParams);
+        progressBar.setVisibility(View.VISIBLE); // Show by default
+
+        // Add views (Order matters: Progress is last so it sits on top)
+        rootLayout.addView(playerView);
+        rootLayout.addView(photoView);
+        rootLayout.addView(progressBar);
+        setContentView(rootLayout);
+
+        // 2. Get Intent Data
+        String fileId = getIntent().getStringExtra("EXTRA_FILE_ID");
+        String accessToken = getIntent().getStringExtra("EXTRA_ACCESS_TOKEN");
+        String mimeType = getIntent().getStringExtra("EXTRA_MIME_TYPE");
+
+        if (fileId == null || accessToken == null) {
+            Toast.makeText(this, "Invalid File Data", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // 3. Decide Mode
+        if (mimeType != null && mimeType.startsWith("video/")) {
+            setupVideo(fileId, accessToken);
+        } else if (mimeType != null && mimeType.startsWith("image/")) {
+            setupImage(fileId, accessToken);
+        } else {
+            Toast.makeText(this, "Unsupported Format", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    // --- VIDEO LOGIC ---
+    private void setupVideo(String fileId, String accessToken) {
+        playerView.setVisibility(View.VISIBLE);
+        photoView.setVisibility(View.GONE);
+        // Progress bar stays visible until buffering completes
+
+        String streamUrl = "https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + accessToken);
+
+        DataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setUserAgent("MyDriveApp/1.0")
+                .setConnectTimeoutMs(8000)
+                .setReadTimeoutMs(8000)
+                .setDefaultRequestProperties(headers);
+
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(streamUrl));
+
+        player = new ExoPlayer.Builder(this).build();
+        playerView.setPlayer(player);
+        player.setMediaSource(mediaSource);
+
+        // Add Listener to handle Buffering/Loading state
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int playbackState) {
+                if (playbackState == Player.STATE_BUFFERING) {
+                    progressBar.setVisibility(View.VISIBLE);
+                } else if (playbackState == Player.STATE_READY) {
+                    progressBar.setVisibility(View.GONE);
+                } else if (playbackState == Player.STATE_ENDED) {
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(DriveViewerActivity.this, "Error playing video", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        player.prepare();
+        player.play();
+    }
+
+    // --- IMAGE LOGIC ---
+    private void setupImage(String fileId, String accessToken) {
+        photoView.setVisibility(View.VISIBLE);
+        playerView.setVisibility(View.GONE);
+        // Progress bar stays visible until Glide finishes
+
+        String imageUrl = "https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media";
+
+        GlideUrl authorizedUrl = new GlideUrl(imageUrl, new LazyHeaders.Builder()
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build());
+
+        Glide.with(this)
+                .load(authorizedUrl)
+                .fitCenter()
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(DriveViewerActivity.this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                        return false; // Return false so Glide still handles the error view if needed
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, GlideDataSource dataSource, boolean isFirstResource) {
+                        progressBar.setVisibility(View.GONE);
+                        return false; // Return false so Glide handles the final display
+                    }
+                })
+                .into(photoView);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (player != null) {
+            player.pause();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (player != null) {
+            player.release();
+            player = null;
+        }
+    }
+}
+
+
+dependencies {import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.MediaSource;
+import androidx.media3.exoplayer.source.ProgressiveMediaSource;
+import androidx.media3.ui.PlayerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource as GlideDataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+import com.github.chrisbanes.photoview.PhotoView;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class DriveViewerActivity extends AppCompatActivity {
+
+    private ExoPlayer player;
+    private PlayerView playerView;
+    private PhotoView photoView;
+    private ProgressBar progressBar; // <-- Added
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // 1. Setup Layout (Video + Image + Progress Stacked)
+        FrameLayout rootLayout = new FrameLayout(this);
+        rootLayout.setBackgroundColor(Color.BLACK);
+        rootLayout.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // Video View
+        playerView = new PlayerView(this);
+        playerView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+        playerView.setVisibility(View.GONE);
+
+        // Image View (PhotoView)
+        photoView = new PhotoView(this);
+        photoView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+        photoView.setVisibility(View.GONE);
+
+        // Loading Indicator (ProgressBar)
+        progressBar = new ProgressBar(this);
+        FrameLayout.LayoutParams progressParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        progressParams.gravity = Gravity.CENTER;
+        progressBar.setLayoutParams(progressParams);
+        progressBar.setVisibility(View.VISIBLE); // Show by default
+
+        // Add views (Order matters: Progress is last so it sits on top)
+        rootLayout.addView(playerView);
+        rootLayout.addView(photoView);
+        rootLayout.addView(progressBar);
+        setContentView(rootLayout);
+
+        // 2. Get Intent Data
+        String fileId = getIntent().getStringExtra("EXTRA_FILE_ID");
+        String accessToken = getIntent().getStringExtra("EXTRA_ACCESS_TOKEN");
+        String mimeType = getIntent().getStringExtra("EXTRA_MIME_TYPE");
+
+        if (fileId == null || accessToken == null) {
+            Toast.makeText(this, "Invalid File Data", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // 3. Decide Mode
+        if (mimeType != null && mimeType.startsWith("video/")) {
+            setupVideo(fileId, accessToken);
+        } else if (mimeType != null && mimeType.startsWith("image/")) {
+            setupImage(fileId, accessToken);
+        } else {
+            Toast.makeText(this, "Unsupported Format", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    // --- VIDEO LOGIC ---
+    private void setupVideo(String fileId, String accessToken) {
+        playerView.setVisibility(View.VISIBLE);
+        photoView.setVisibility(View.GONE);
+        // Progress bar stays visible until buffering completes
+
+        String streamUrl = "https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + accessToken);
+
+        DataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory()
+                .setUserAgent("MyDriveApp/1.0")
+                .setConnectTimeoutMs(8000)
+                .setReadTimeoutMs(8000)
+                .setDefaultRequestProperties(headers);
+
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(streamUrl));
+
+        player = new ExoPlayer.Builder(this).build();
+        playerView.setPlayer(player);
+        player.setMediaSource(mediaSource);
+
+        // Add Listener to handle Buffering/Loading state
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int playbackState) {
+                if (playbackState == Player.STATE_BUFFERING) {
+                    progressBar.setVisibility(View.VISIBLE);
+                } else if (playbackState == Player.STATE_READY) {
+                    progressBar.setVisibility(View.GONE);
+                } else if (playbackState == Player.STATE_ENDED) {
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(DriveViewerActivity.this, "Error playing video", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        player.prepare();
+        player.play();
+    }
+
+    // --- IMAGE LOGIC ---
+    private void setupImage(String fileId, String accessToken) {
+        photoView.setVisibility(View.VISIBLE);
+        playerView.setVisibility(View.GONE);
+        // Progress bar stays visible until Glide finishes
+
+        String imageUrl = "https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media";
+
+        GlideUrl authorizedUrl = new GlideUrl(imageUrl, new LazyHeaders.Builder()
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build());
+
+        Glide.with(this)
+                .load(authorizedUrl)
+                .fitCenter()
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(DriveViewerActivity.this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                        return false; // Return false so Glide still handles the error view if needed
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, GlideDataSource dataSource, boolean isFirstResource) {
+                        progressBar.setVisibility(View.GONE);
+                        return false; // Return false so Glide handles the final display
+                    }
+                })
+                .into(photoView);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (player != null) {
+            player.pause();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (player != null) {
+            player.release();
+            player = null;
+        }
+    }
+}
+
+
+dependencies {
+    // Existing dependencies
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    
+    // Add this for Zoom support
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+}
+
+
+import android.content.Context;
+import android.content.Intent;
+
+public class DriveViewerLauncher {
+
+    /**
+     * Launches the viewer for either Video or Image.
+     * @param mimeType e.g., "video/mp4", "image/jpeg", "image/png"
+     */
+    public static void view(Context context, String fileId, String accessToken, String mimeType) {
+        Intent intent = new Intent(context, DriveViewerActivity.class);
+        intent.putExtra("EXTRA_FILE_ID", fileId);
+        intent.putExtra("EXTRA_ACCESS_TOKEN", accessToken);
+        intent.putExtra("EXTRA_MIME_TYPE", mimeType);
+        context.startActivity(intent);
+    }
+}
+
+
+<activity android:name=".DrivePlayerActivity"
+    android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+    android:theme="@style/Theme.AppCompat.NoActionBar" />
+    // Existing dependencies
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    
+    // Add this for Zoom support
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+}
+
+
+import android.content.Context;
+import android.content.Intent;
+
+public class DriveViewerLauncher {
+
+    /**
+     * Launches the viewer for either Video or Image.
+     * @param mimeType e.g., "video/mp4", "image/jpeg", "image/png"
+     */
+    public static void view(Context context, String fileId, String accessToken, String mimeType) {
+        Intent intent = new Intent(context, DriveViewerActivity.class);
+        intent.putExtra("EXTRA_FILE_ID", fileId);
+        intent.putExtra("EXTRA_ACCESS_TOKEN", accessToken);
+        intent.putExtra("EXTRA_MIME_TYPE", mimeType);
+        context.startActivity(intent);
+    }
+}
+
+
+<activity android:name=".DrivePlayerActivity"
+    android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+    android:theme="@style/Theme.AppCompat.NoActionBar" />

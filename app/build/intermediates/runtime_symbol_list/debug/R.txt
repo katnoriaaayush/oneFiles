@@ -3116,6 +3116,12 @@ int id bounce 0x7f08005e
 int id bounceBoth 0x7f08005f
 int id bounceEnd 0x7f080060
 int id bounceStart 0x7f080061
+int id breadcrumb_container 0x7f08020f
+int id breadcrumb_container_main 0x7f080210
+int id btn_cancel 0x7f08020a
+int id btn_local_storage 0x7f080201
+int id btn_move_here 0x7f08020b
+int id btn_onedrive 0x7f080202
 int id buttonPanel 0x7f080062
 int id cache_measures 0x7f080063
 int id callMeasure 0x7f080064
@@ -3138,6 +3144,7 @@ int id clear_text 0x7f080073
 int id clip_horizontal 0x7f080074
 int id clip_vertical 0x7f080075
 int id clockwise 0x7f080076
+int id close_search 0x7f080211
 int id closest 0x7f080077
 int id collapseActionView 0x7f080078
 int id compress 0x7f080079
@@ -3155,6 +3162,7 @@ int id cradle 0x7f080084
 int id currentState 0x7f080085
 int id custom 0x7f080086
 int id customPanel 0x7f080087
+int id custom_header 0x7f080212
 int id cut 0x7f080088
 int id date_picker_actions 0x7f080089
 int id decelerate 0x7f08008a
@@ -3169,6 +3177,7 @@ int id design_menu_item_action_area_stub 0x7f080092
 int id design_menu_item_text 0x7f080093
 int id design_navigation_view 0x7f080094
 int id dialog_button 0x7f080095
+int id dialog_title 0x7f08020d
 int id dimensions 0x7f080096
 int id direct 0x7f080097
 int id disableHome 0x7f080098
@@ -3193,6 +3202,7 @@ int id edge 0x7f0800aa
 int id edit_query 0x7f0800ab
 int id elastic 0x7f0800ac
 int id embed 0x7f0800ad
+int id empty_view_local 0x7f080203
 int id end 0x7f0800ae
 int id endToStart 0x7f0800af
 int id enterAlways 0x7f0800b0
@@ -3210,6 +3220,9 @@ int id fileName 0x7f0801fb
 int id fileNameGrid 0x7f0801f5
 int id fileSize 0x7f0801fc
 int id fileSizeGrid 0x7f0801f6
+int id file_details 0x7f080204
+int id file_icon 0x7f080205
+int id file_name 0x7f080206
 int id fill 0x7f0800b7
 int id fill_horizontal 0x7f0800b8
 int id fill_vertical 0x7f0800b9
@@ -3294,6 +3307,7 @@ int id material_timepicker_ok_button 0x7f080107
 int id material_timepicker_view 0x7f080108
 int id material_value_index 0x7f080109
 int id matrix 0x7f08010a
+int id menu_button 0x7f080213
 int id message 0x7f08010b
 int id middle 0x7f08010c
 int id mini 0x7f08010d
@@ -3370,12 +3384,15 @@ int id position 0x7f080153
 int id postLayout 0x7f080154
 int id pressed 0x7f080155
 int id progress_bar 0x7f0801fd
+int id progress_bar_local 0x7f080207
 int id progress_circular 0x7f080156
 int id progress_horizontal 0x7f080157
 int id radio 0x7f080158
 int id ratio 0x7f080159
 int id rectangles 0x7f08015a
 int id recycler_view 0x7f08015b
+int id recycler_view_folders 0x7f08020e
+int id recycler_view_local 0x7f080208
 int id reverseSawtooth 0x7f08015c
 int id right 0x7f08015d
 int id rightToLeft 0x7f08015e
@@ -3398,11 +3415,14 @@ int id search_bar 0x7f08016e
 int id search_bar_text_view 0x7f08016f
 int id search_button 0x7f080170
 int id search_close_btn 0x7f080171
+int id search_container 0x7f080214
 int id search_edit_frame 0x7f080172
+int id search_edit_text 0x7f080215
 int id search_go_btn 0x7f080173
 int id search_mag_icon 0x7f080174
 int id search_plate 0x7f080175
 int id search_src_text 0x7f080176
+int id search_status_text 0x7f080209
 int id search_view_background 0x7f080177
 int id search_view_clear_button 0x7f080178
 int id search_view_content_container 0x7f080179
@@ -3420,6 +3440,9 @@ int id search_voice_btn 0x7f080184
 int id select_dialog_listview 0x7f080185
 int id selected 0x7f080186
 int id selectionCheckbox 0x7f0801ff
+int id selection_card 0x7f080216
+int id selection_close 0x7f080217
+int id selection_count 0x7f080218
 int id selection_type 0x7f080187
 int id sharedValueSet 0x7f080188
 int id sharedValueUnset 0x7f080189
@@ -3642,6 +3665,8 @@ int layout abc_search_dropdown_item_icons_2line 0x7f0b0018
 int layout abc_search_view 0x7f0b0019
 int layout abc_select_dialog_material 0x7f0b001a
 int layout abc_tooltip 0x7f0b001b
+int layout activity_launch 0x7f0b006e
+int layout activity_local_files 0x7f0b006f
 int layout activity_main 0x7f0b001c
 int layout custom_dialog 0x7f0b001d
 int layout design_bottom_navigation_item 0x7f0b001e
@@ -3659,10 +3684,12 @@ int layout design_navigation_menu 0x7f0b0029
 int layout design_navigation_menu_item 0x7f0b002a
 int layout design_text_input_end_icon 0x7f0b002b
 int layout design_text_input_start_icon 0x7f0b002c
+int layout dialog_folder_picker 0x7f0b0071
 int layout file_item 0x7f0b006b
 int layout item_file 0x7f0b002d
 int layout item_file_grid 0x7f0b006c
 int layout item_file_list 0x7f0b006d
+int layout item_local_file 0x7f0b0070
 int layout m3_alert_dialog 0x7f0b002e
 int layout m3_alert_dialog_actions 0x7f0b002f
 int layout m3_alert_dialog_title 0x7f0b0030
@@ -4504,6 +4531,7 @@ int style Theme_MaterialComponents_Light_NoActionBar_Bridge 0x7f100265
 int style Theme_MaterialComponents_NoActionBar 0x7f100266
 int style Theme_MaterialComponents_NoActionBar_Bridge 0x7f100267
 int style Theme_OneDriveExplorer 0x7f100268
+int style Theme_OneDriveExplorer_NoActionBar 0x7f10044e
 int style ThemeOverlay_AppCompat 0x7f100269
 int style ThemeOverlay_AppCompat_ActionBar 0x7f10026a
 int style ThemeOverlay_AppCompat_Dark 0x7f10026b

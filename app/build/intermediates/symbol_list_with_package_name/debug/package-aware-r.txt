@@ -3117,6 +3117,12 @@ id bounce
 id bounceBoth
 id bounceEnd
 id bounceStart
+id breadcrumb_container
+id breadcrumb_container_main
+id btn_cancel
+id btn_local_storage
+id btn_move_here
+id btn_onedrive
 id buttonPanel
 id cache_measures
 id callMeasure
@@ -3139,6 +3145,7 @@ id clear_text
 id clip_horizontal
 id clip_vertical
 id clockwise
+id close_search
 id closest
 id collapseActionView
 id compress
@@ -3156,6 +3163,7 @@ id cradle
 id currentState
 id custom
 id customPanel
+id custom_header
 id cut
 id date_picker_actions
 id decelerate
@@ -3170,6 +3178,7 @@ id design_menu_item_action_area_stub
 id design_menu_item_text
 id design_navigation_view
 id dialog_button
+id dialog_title
 id dimensions
 id direct
 id disableHome
@@ -3194,6 +3203,7 @@ id edge
 id edit_query
 id elastic
 id embed
+id empty_view_local
 id end
 id endToStart
 id enterAlways
@@ -3211,6 +3221,9 @@ id fileName
 id fileNameGrid
 id fileSize
 id fileSizeGrid
+id file_details
+id file_icon
+id file_name
 id fill
 id fill_horizontal
 id fill_vertical
@@ -3295,6 +3308,7 @@ id material_timepicker_ok_button
 id material_timepicker_view
 id material_value_index
 id matrix
+id menu_button
 id message
 id middle
 id mini
@@ -3371,12 +3385,15 @@ id position
 id postLayout
 id pressed
 id progress_bar
+id progress_bar_local
 id progress_circular
 id progress_horizontal
 id radio
 id ratio
 id rectangles
 id recycler_view
+id recycler_view_folders
+id recycler_view_local
 id reverseSawtooth
 id right
 id rightToLeft
@@ -3399,11 +3416,14 @@ id search_bar
 id search_bar_text_view
 id search_button
 id search_close_btn
+id search_container
 id search_edit_frame
+id search_edit_text
 id search_go_btn
 id search_mag_icon
 id search_plate
 id search_src_text
+id search_status_text
 id search_view_background
 id search_view_clear_button
 id search_view_content_container
@@ -3421,6 +3441,9 @@ id search_voice_btn
 id select_dialog_listview
 id selected
 id selectionCheckbox
+id selection_card
+id selection_close
+id selection_count
 id selection_type
 id sharedValueSet
 id sharedValueUnset
@@ -3643,6 +3666,8 @@ layout abc_search_dropdown_item_icons_2line
 layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
+layout activity_launch
+layout activity_local_files
 layout activity_main
 layout custom_dialog
 layout design_bottom_navigation_item
@@ -3660,10 +3685,12 @@ layout design_navigation_menu
 layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
+layout dialog_folder_picker
 layout file_item
 layout item_file
 layout item_file_grid
 layout item_file_list
+layout item_local_file
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title
@@ -4505,6 +4532,7 @@ style Theme_MaterialComponents_Light_NoActionBar_Bridge
 style Theme_MaterialComponents_NoActionBar
 style Theme_MaterialComponents_NoActionBar_Bridge
 style Theme_OneDriveExplorer
+style Theme_OneDriveExplorer_NoActionBar
 style ThemeOverlay_AppCompat
 style ThemeOverlay_AppCompat_ActionBar
 style ThemeOverlay_AppCompat_Dark
